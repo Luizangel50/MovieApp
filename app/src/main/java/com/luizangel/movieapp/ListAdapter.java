@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.provider.SyncStateContract;
 import android.support.v7.widget.DrawableUtils;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -98,16 +99,14 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
     private void buildMovieInformations(ListAdapterViewHolder listAdapterViewHolder,
                                         HashMap itemMovie) {
 
-        listAdapterViewHolder.mMovieTextView.setText(
-                "Title: " + itemMovie.get("title") + "\n\n"
-                + "Overview: " + itemMovie.get("overview") + "\n\n"
-                + "Year of release: " + ((String) itemMovie.get("release_date")).substring(0, 4));
-
+        listAdapterViewHolder.mMovieTextView.setText(getTextFromFields(itemMovie));
 
         Bitmap bm = (Bitmap) itemMovie.get("movie_image");
-        Drawable d = new BitmapDrawable(bm);
-        d.setBounds(0, 0, bm.getWidth(), bm.getHeight());
-        listAdapterViewHolder.mMovieTextView.setCompoundDrawables(d, null, null, null);
+        if (bm != null) {
+            Drawable d = new BitmapDrawable(bm);
+            d.setBounds(0, 0, bm.getWidth(), bm.getHeight());
+            listAdapterViewHolder.mMovieTextView.setCompoundDrawables(d, null, null, null);
+        }
 
     }
 
@@ -122,7 +121,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
      */
     @Override
     public void onBindViewHolder(ListAdapterViewHolder listAdapterViewHolder, int position) {
+        //Sometimes gets the worng member of the list
         HashMap<String, String> itemMovie = mMovieData.get(position);
+        listAdapterViewHolder.setIsRecyclable(false);
+
+        //Always get the correct member of the list
+//        HashMap<String, String> itemMovie = mMovieData.get(listAdapterViewHolder.getLayoutPosition());
         buildMovieInformations(listAdapterViewHolder, itemMovie);
     }
 
@@ -133,10 +137,13 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
      */
     @Override
     public int getItemCount() {
-        if (null == mMovieData) return 0;
-//        return mMovieData.size();
-        return mNumberItems;
+        if (mMovieData == null) {
+            return 0;
+        } else {
+            return mMovieData.size();
+        }
     }
+
 
     /**
      * This method is used to set the data on Adapter if it was already created one.
@@ -146,5 +153,30 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
     public void setMovieData(ArrayList<HashMap> movieData) {
         mMovieData = movieData;
         notifyDataSetChanged();
+    }
+
+    private String getTextFromFields(HashMap itemMovie) {
+        String textOutput = "";
+        String notAvailable = "Not available.";
+
+        if (itemMovie.get("title") != null && !itemMovie.get("title").toString().isEmpty()) {
+            textOutput += "Title: " + itemMovie.get("title") + "\n\n";
+        } else {
+            textOutput += "Title: " + notAvailable + "\n\n";
+        }
+
+        if (itemMovie.get("overview") != null && !itemMovie.get("overview").toString().isEmpty()) {
+            textOutput += "Overview: " + itemMovie.get("overview") + "\n\n";
+        } else {
+            textOutput += "Overview: " + notAvailable + "\n\n";
+        }
+
+        if (itemMovie.get("release_date") != null && !((String) itemMovie.get("release_date")).isEmpty()) {
+            textOutput += "Year of release: " + ((String) itemMovie.get("release_date")).substring(0, 4);
+        } else {
+            textOutput += "Year of release: " + notAvailable;
+        }
+
+        return textOutput;
     }
 }

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.Scanner;
 
@@ -76,7 +77,7 @@ public final class NetworkUtils {
         if (isSearch) {
             builtUri = Uri.parse(KEYWORD_MOVIES_URL).buildUpon()
                     .appendQueryParameter(AUTH_PARAM, apiKey)
-                    .appendQueryParameter(LANGUAGE_PARAM, language)
+//                    .appendQueryParameter(LANGUAGE_PARAM, language)
                     .appendQueryParameter(QUERY_PARAM, keywordSearch)
                     .appendQueryParameter(PAGE_PARAM, pageNumber)
                     .build();
@@ -96,7 +97,7 @@ public final class NetworkUtils {
             e.printStackTrace();
         }
 
-        Log.v(TAG, "Building search URL " + url);
+//        Log.v(TAG, "Building search URL " + url);
 
         return url;
     }
@@ -126,7 +127,7 @@ public final class NetworkUtils {
             e.printStackTrace();
         }
 
-        Log.v(TAG, "Building movie details URL " + url);
+//        Log.v(TAG, "Building movie details URL " + url);
 
         return url;
     }
@@ -151,7 +152,7 @@ public final class NetworkUtils {
             e.printStackTrace();
         }
 
-        Log.v(TAG, "Building image URL " + url);
+//        Log.v(TAG, "Building image URL " + url);
 
         return url;
     }
@@ -167,6 +168,7 @@ public final class NetworkUtils {
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
         try {
+//            urlConnection.setConnectTimeout(2000);
             InputStream in = urlConnection.getInputStream();
 
             Scanner scanner = new Scanner(in);
@@ -178,6 +180,9 @@ public final class NetworkUtils {
             } else {
                 return null;
             }
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+            return null;
         } finally {
             urlConnection.disconnect();
         }
@@ -203,6 +208,7 @@ public final class NetworkUtils {
             in.close();
 
             if (bm == null) {
+//                Log.v(TAG, "not existent image");
                 return null;
             } else {
                 return bm;

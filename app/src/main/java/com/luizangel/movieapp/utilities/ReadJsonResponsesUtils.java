@@ -105,8 +105,14 @@ public final class ReadJsonResponsesUtils {
                     currentMovieObject.getString(FIELD_ID));
 
             try {
-                Bitmap bm = NetworkUtils.getImageFromHttpUrl(
-                        NetworkUtils.imageURL(currentMovieObject.getString(FIELD_POSTER_PATH)));
+                posterPath = currentMovieObject.getString(FIELD_POSTER_PATH);
+//                Log.v("Imagem path: ", posterPath);
+                Bitmap bm = null;
+
+                if (!posterPath.equals("null")) {
+                    bm = NetworkUtils.getImageFromHttpUrl(
+                            NetworkUtils.imageURL(currentMovieObject.getString(FIELD_POSTER_PATH)));
+                }
 
                 movieInfo.put("movie_image", bm);
             } catch (IOException e) {
@@ -117,7 +123,7 @@ public final class ReadJsonResponsesUtils {
 
         }
 
-        Log.v("Test Movie Data:", (String) parsedMovieData.get(0).get(FIELD_TITLE));
+//        Log.v("Test Movie Data:", (String) parsedMovieData.get(0).get(FIELD_TITLE));
         return parsedMovieData;
     }
 
