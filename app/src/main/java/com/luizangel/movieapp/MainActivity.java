@@ -47,6 +47,10 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
 
     private int pageNumberSearch = 1;
 
+    private ArrayList<HashMap> currentMovieDataPopular;
+
+    private ArrayList<HashMap> currentMovieDataSearch;
+
     private boolean isSearch = false;
 
     SearchView searchView;
@@ -72,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
         final LinearLayoutManager layoutManagerPopular
                 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
-        LinearLayoutManager layoutManagerSearch
+        final LinearLayoutManager layoutManagerSearch
                 = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
         mPopularRecyclerView.setLayoutManager(layoutManagerPopular);
@@ -105,12 +109,28 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
 
-                int visibleItemCount = layoutManagerPopular.getChildCount();
                 int totalItemCount = layoutManagerPopular.getItemCount();
-                int pastVisibleItems = layoutManagerPopular.findFirstVisibleItemPosition();
-                if (pastVisibleItems + visibleItemCount >= totalItemCount) {
+                int lastVisibleItem = layoutManagerPopular.findLastCompletelyVisibleItemPosition();
+
+                if (lastVisibleItem == totalItemCount - 1) {
                     pageNumberPopular += 1;
                     loadMovieData(null);
+                }
+            }
+        });
+
+        mSearchRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
+                int totalItemCount = layoutManagerSearch.getItemCount();
+                int lastVisibleItem = layoutManagerSearch.findLastCompletelyVisibleItemPosition();
+
+                if (lastVisibleItem == totalItemCount - 1) {
+                    pageNumberSearch += 1;
+                    EditText searchPlate = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+                    loadMovieData(searchPlate.getText().toString());
                 }
             }
         });
@@ -228,7 +248,24 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
                 ArrayList<HashMap> simpleJsonMovieData = ReadJsonResponsesUtils
                         .getSimpleMovieStringsFromJson(MainActivity.this, jsonMovieResponse);
 
-                return simpleJsonMovieData;
+                if (!isSearch && params[1].equals("1")) {
+                    currentMovieDataPopular = simpleJsonMovieData;
+                }
+                else if(!isSearch && !params[1].equals("1")) {
+                    currentMovieDataPopular.addAll(simpleJsonMovieData);
+                }
+                else if (isSearch && params[1].equals("1")) {
+                    currentMovieDataSearch = simpleJsonMovieData;
+                }
+                else if(isSearch && !params[1].equals("1")) {
+                    currentMovieDataSearch.addAll(simpleJsonMovieData);
+                }
+
+               if (isSearch) {
+                   return currentMovieDataSearch;
+               } else {
+                   return currentMovieDataPopular;
+               }
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -330,6 +367,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
                         searchMovieTask.cancel(true);
                     }
 
+                    pageNumberSearch = 1;
                     searchMovieTask = loadMovieData(newText);
                     mSearchRecyclerView.scrollToPosition(0);
 
@@ -348,10 +386,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
         Log.v("backbutton","Search icon click, asdsadsasadsa");
         if (!searchView.isIconified()) {
             showPopularMovieView();
-//            searchView.clearFocus();
-
             searchView.onActionViewCollapsed();
-
             searchView.setIconified(true);
 
         } else {
@@ -359,19 +394,5 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
         }
 
     }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        int id = item.getItemId();
-//
-//        if (id == R.id.action_search) {
-////            mListAdapter.setMovieData(null);
-////            loadMovieData(getString(R.string.popular_movies));
-//
-//            return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
 
 }

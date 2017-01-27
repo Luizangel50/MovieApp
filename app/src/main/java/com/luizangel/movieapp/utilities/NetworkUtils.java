@@ -32,7 +32,7 @@ public final class NetworkUtils {
             "https://api.themoviedb.org/3/search/movie";
 
     private static final String IMAGE_URL =
-            "https://image.tmdb.org/t/p/w154";
+            "https://image.tmdb.org/t/p/w185";
 
 
     /**
@@ -77,7 +77,6 @@ public final class NetworkUtils {
         if (isSearch) {
             builtUri = Uri.parse(KEYWORD_MOVIES_URL).buildUpon()
                     .appendQueryParameter(AUTH_PARAM, apiKey)
-//                    .appendQueryParameter(LANGUAGE_PARAM, language)
                     .appendQueryParameter(QUERY_PARAM, keywordSearch)
                     .appendQueryParameter(PAGE_PARAM, pageNumber)
                     .build();

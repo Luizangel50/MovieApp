@@ -106,6 +106,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
             Drawable d = new BitmapDrawable(bm);
             d.setBounds(0, 0, bm.getWidth(), bm.getHeight());
             listAdapterViewHolder.mMovieTextView.setCompoundDrawables(d, null, null, null);
+            listAdapterViewHolder.mMovieTextView.refreshDrawableState();
+        } else {
+            listAdapterViewHolder.mMovieTextView.setCompoundDrawables(null, null, null, null);
+            listAdapterViewHolder.mMovieTextView.refreshDrawableState();
         }
 
     }
@@ -123,7 +127,7 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
     public void onBindViewHolder(ListAdapterViewHolder listAdapterViewHolder, int position) {
         //Sometimes gets the worng member of the list
         HashMap<String, String> itemMovie = mMovieData.get(position);
-        listAdapterViewHolder.setIsRecyclable(false);
+//        listAdapterViewHolder.setIsRecyclable(false);
 
         //Always get the correct member of the list
 //        HashMap<String, String> itemMovie = mMovieData.get(listAdapterViewHolder.getLayoutPosition());
