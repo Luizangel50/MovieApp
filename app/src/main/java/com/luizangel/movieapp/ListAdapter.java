@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.provider.SyncStateContract;
-import android.support.v7.widget.DrawableUtils;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,15 +11,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.luizangel.movieapp.utilities.NetworkUtils;
-
-import java.io.IOException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterViewHolder> {
+
+    /********************************** Variables, constants and constructor **********************/
 
     private int mNumberItems;
 
@@ -34,13 +30,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
     private final ListAdapterOnClickHandler mClickHandler;
 
     /**
-     * The interface that receives onClick messages.
-     */
-    public interface ListAdapterOnClickHandler {
-        void onClick(HashMap<String, String> selectedMovie);
-    }
-
-    /**
      * Creates a ListAdapter.
      *
      * @param clickHandler The on-click handler for this adapter. This single handler is called
@@ -51,30 +40,62 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
         mClickHandler = clickHandler;
     }
 
-    /**
-     * Cache of the children views for a list item.
-     */
-    public class ListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public final TextView mMovieTextView;
+    /********************************** Non-overridden methods ***********************************/
 
-        public ListAdapterViewHolder(View view) {
-            super(view);
-            mMovieTextView = (TextView) view.findViewById(R.id.tv_movie_data);
-            view.setOnClickListener(this);
+    private void buildMovieInformations(ListAdapterViewHolder listAdapterViewHolder,
+                                        HashMap itemMovie) {
+
+        listAdapterViewHolder.mMovieTextView.setText(getTextFromFields(itemMovie));
+
+        Bitmap bm = (Bitmap) itemMovie.get("movie_image");
+        if (bm != null) {
+            Drawable d = new BitmapDrawable(bm);
+            d.setBounds(0, 0, bm.getWidth(), bm.getHeight());
+            listAdapterViewHolder.mMovieTextView.setCompoundDrawables(d, null, null, null);
+            listAdapterViewHolder.mMovieTextView.refreshDrawableState();
+        } else {
+            listAdapterViewHolder.mMovieTextView.setCompoundDrawables(null, null, null, null);
+            listAdapterViewHolder.mMovieTextView.refreshDrawableState();
         }
 
-        /**
-         * This gets called by the child views during a click.
-         *
-         * @param v The View that was clicked
-         */
-        @Override
-        public void onClick(View v) {
-            int adapterPosition = getAdapterPosition();
-            HashMap<String, String> selectedMovie = mMovieData.get(adapterPosition);
-            mClickHandler.onClick(selectedMovie);
-        }
     }
+
+    /**
+     * This method is used to set the data on Adapter if it was already created one.
+     *
+     * @param movieData The new data to be displayed.
+     */
+    public void setMovieData(ArrayList<HashMap> movieData) {
+        mMovieData = movieData;
+        notifyDataSetChanged();
+    }
+
+    private String getTextFromFields(HashMap itemMovie) {
+        String textOutput = "";
+        String notAvailable = "Not available.";
+
+        if (itemMovie.get("title") != null && !itemMovie.get("title").toString().isEmpty()) {
+            textOutput += "Title: " + itemMovie.get("title") + "\n\n";
+        } else {
+            textOutput += "Title: " + notAvailable + "\n\n";
+        }
+
+        if (itemMovie.get("overview") != null && !itemMovie.get("overview").toString().isEmpty()) {
+            textOutput += "Overview: " + itemMovie.get("overview") + "\n\n";
+        } else {
+            textOutput += "Overview: " + notAvailable + "\n\n";
+        }
+
+        if (itemMovie.get("release_date") != null && !((String) itemMovie.get("release_date")).isEmpty()) {
+            textOutput += "Year of release: " + ((String) itemMovie.get("release_date")).substring(0, 4);
+        } else {
+            textOutput += "Year of release: " + notAvailable;
+        }
+
+        return textOutput;
+    }
+
+    /********************************** Overridden methods ***************************************/
 
     /**
      * This gets called when each new ViewHolder is created. This happens when the RecyclerView
@@ -94,24 +115,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
 
         View view = inflater.inflate(layoutIdForListItem, viewGroup, shouldAttachToParentImmediately);
         return new ListAdapterViewHolder(view);
-    }
-
-    private void buildMovieInformations(ListAdapterViewHolder listAdapterViewHolder,
-                                        HashMap itemMovie) {
-
-        listAdapterViewHolder.mMovieTextView.setText(getTextFromFields(itemMovie));
-
-        Bitmap bm = (Bitmap) itemMovie.get("movie_image");
-        if (bm != null) {
-            Drawable d = new BitmapDrawable(bm);
-            d.setBounds(0, 0, bm.getWidth(), bm.getHeight());
-            listAdapterViewHolder.mMovieTextView.setCompoundDrawables(d, null, null, null);
-            listAdapterViewHolder.mMovieTextView.refreshDrawableState();
-        } else {
-            listAdapterViewHolder.mMovieTextView.setCompoundDrawables(null, null, null, null);
-            listAdapterViewHolder.mMovieTextView.refreshDrawableState();
-        }
-
     }
 
     /**
@@ -148,39 +151,37 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ListAdapterVie
         }
     }
 
+    /********************************** Interfaces and Classes ***********************************/
+    /**
+     * The interface that receives onClick messages.
+     */
+    public interface ListAdapterOnClickHandler {
+        void onClick(HashMap<String, String> selectedMovie);
+    }
 
     /**
-     * This method is used to set the data on Adapter if it was already created one.
-     *
-     * @param movieData The new data to be displayed.
+     * Cache of the children views for a list item.
      */
-    public void setMovieData(ArrayList<HashMap> movieData) {
-        mMovieData = movieData;
-        notifyDataSetChanged();
+    public class ListAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public final TextView mMovieTextView;
+
+        public ListAdapterViewHolder(View view) {
+            super(view);
+            mMovieTextView = (TextView) view.findViewById(R.id.tv_movie_data);
+            view.setOnClickListener(this);
+        }
+
+        /**
+         * This gets called by the child views during a click.
+         *
+         * @param v The View that was clicked
+         */
+        @Override
+        public void onClick(View v) {
+            int adapterPosition = getAdapterPosition();
+            HashMap<String, String> selectedMovie = mMovieData.get(adapterPosition);
+            mClickHandler.onClick(selectedMovie);
+        }
     }
 
-    private String getTextFromFields(HashMap itemMovie) {
-        String textOutput = "";
-        String notAvailable = "Not available.";
-
-        if (itemMovie.get("title") != null && !itemMovie.get("title").toString().isEmpty()) {
-            textOutput += "Title: " + itemMovie.get("title") + "\n\n";
-        } else {
-            textOutput += "Title: " + notAvailable + "\n\n";
-        }
-
-        if (itemMovie.get("overview") != null && !itemMovie.get("overview").toString().isEmpty()) {
-            textOutput += "Overview: " + itemMovie.get("overview") + "\n\n";
-        } else {
-            textOutput += "Overview: " + notAvailable + "\n\n";
-        }
-
-        if (itemMovie.get("release_date") != null && !((String) itemMovie.get("release_date")).isEmpty()) {
-            textOutput += "Year of release: " + ((String) itemMovie.get("release_date")).substring(0, 4);
-        } else {
-            textOutput += "Year of release: " + notAvailable;
-        }
-
-        return textOutput;
-    }
 }

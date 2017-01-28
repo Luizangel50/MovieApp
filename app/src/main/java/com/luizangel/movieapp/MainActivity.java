@@ -29,6 +29,8 @@ import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements ListAdapter.ListAdapterOnClickHandler {
 
+    /********************************** Variables and constants ***********************************/
+
     private RecyclerView mPopularRecyclerView;
 
     private RecyclerView mSearchRecyclerView;
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
 
     private ProgressBar mLoadingIndicator;
 
-    private int NUMBER_ITEMS = 10;
+    private final int NUMBER_ITEMS = 10;
 
     private int pageNumberPopular = 1;
 
@@ -53,105 +55,20 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
 
     private boolean isSearch = false;
 
-    SearchView searchView;
+    SearchView mSearchView;
 
-    Context context;
+    Context mContext;
 
     private Toast mToast;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        context = this;
-
-        mPopularRecyclerView = (RecyclerView) findViewById(R.id.rv_popular_movies);
-
-        mSearchRecyclerView = (RecyclerView) findViewById(R.id.rv_search_movies);
-
-        /* This TextView is used to display errors and will be hidden if there are no errors */
-        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
-
-        final LinearLayoutManager layoutManagerPopular
-                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-
-        final LinearLayoutManager layoutManagerSearch
-                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-
-        mPopularRecyclerView.setLayoutManager(layoutManagerPopular);
-
-        mSearchRecyclerView.setLayoutManager(layoutManagerSearch);
-
-        /*
-         * Improve performance if you know that changes in content do not
-         * change the child layout size in the RecyclerView
-         */
-        mPopularRecyclerView.setHasFixedSize(true);
-
-        mSearchRecyclerView.setHasFixedSize(true);
-
-        /*
-         * The Adapter is responsible for linking our data with the Views that
-         * will end up displaying those data.
-         */
-        mPopularListAdapter = new ListAdapter(NUMBER_ITEMS, this);
-
-        mSearchListAdapter = new ListAdapter(NUMBER_ITEMS, this);
-
-        /* Setting the adapter attaches it to the RecyclerView in our layout. */
-        mPopularRecyclerView.setAdapter(mPopularListAdapter);
-
-        mSearchRecyclerView.setAdapter(mSearchListAdapter);
-
-        mPopularRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-
-                int totalItemCount = layoutManagerPopular.getItemCount();
-                int lastVisibleItem = layoutManagerPopular.findLastCompletelyVisibleItemPosition();
-
-                if (lastVisibleItem == totalItemCount - 1) {
-                    pageNumberPopular += 1;
-                    loadMovieData(null);
-                }
-            }
-        });
-
-        mSearchRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-
-                int totalItemCount = layoutManagerSearch.getItemCount();
-                int lastVisibleItem = layoutManagerSearch.findLastCompletelyVisibleItemPosition();
-
-                if (lastVisibleItem == totalItemCount - 1) {
-                    pageNumberSearch += 1;
-                    EditText searchPlate = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
-                    loadMovieData(searchPlate.getText().toString());
-                }
-            }
-        });
-
-        /*
-         * The ProgressBar that will indicate to the user that we are loading data. It will be
-         * hidden when no data is loading.
-         *
-         */
-        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
-
-        /* Once all of our views are setup, we can load the movie data. */
-        isSearch = false;
-        loadMovieData(null);
-    }
+    /********************************** Non-overridden methods ***********************************/
 
     /**
      * This method will make the View for the movie data visible and
      * hide the error message.
      *
      */
+
     private void showPopularMovieView() {
         isSearch = false;
         setTitle(getString(R.string.popular_movies));
@@ -210,15 +127,208 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
         return newTask;
     }
 
+    /********************************** Overridden methods ***********************************/
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        mContext = this;
+
+        mPopularRecyclerView = (RecyclerView) findViewById(R.id.rv_popular_movies);
+
+        mSearchRecyclerView = (RecyclerView) findViewById(R.id.rv_search_movies);
+
+        /* This TextView is used to display errors and will be hidden if there are no errors */
+        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
+
+        final LinearLayoutManager layoutManagerPopular
+                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        final LinearLayoutManager layoutManagerSearch
+                = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+
+        mPopularRecyclerView.setLayoutManager(layoutManagerPopular);
+
+        mSearchRecyclerView.setLayoutManager(layoutManagerSearch);
+
+        /*
+         * Improve performance if you know that changes in content do not
+         * change the child layout size in the RecyclerView
+         */
+        mPopularRecyclerView.setHasFixedSize(true);
+
+        mSearchRecyclerView.setHasFixedSize(true);
+
+        /*
+         * The Adapter is responsible for linking our data with the Views that
+         * will end up displaying those data.
+         */
+        mPopularListAdapter = new ListAdapter(NUMBER_ITEMS, this);
+
+        mSearchListAdapter = new ListAdapter(NUMBER_ITEMS, this);
+
+        /* Setting the adapter attaches it to the RecyclerView in our layout. */
+        mPopularRecyclerView.setAdapter(mPopularListAdapter);
+
+        mSearchRecyclerView.setAdapter(mSearchListAdapter);
+
+        /* Listeners for scrolling on RecyclerViews */
+        mPopularRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
+                int totalItemCount = layoutManagerPopular.getItemCount();
+                int lastVisibleItem = layoutManagerPopular.findLastCompletelyVisibleItemPosition();
+
+                if (lastVisibleItem == totalItemCount - 1) {
+                    pageNumberPopular += 1;
+                    loadMovieData(null);
+                }
+            }
+        });
+
+        mSearchRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
+                int totalItemCount = layoutManagerSearch.getItemCount();
+                int lastVisibleItem = layoutManagerSearch.findLastCompletelyVisibleItemPosition();
+
+                if (lastVisibleItem == totalItemCount - 1) {
+                    pageNumberSearch += 1;
+                    EditText searchPlate = (EditText) mSearchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+                    loadMovieData(searchPlate.getText().toString());
+                }
+            }
+        });
+
+
+        /*
+         * The ProgressBar that will indicate to the user that we are loading data. It will be
+         * hidden when no data is loading.
+         *
+         */
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+
+        /* Once all of our views are setup, we can load the movie data. */
+        isSearch = false;
+        loadMovieData(null);
+    }
+
     @Override
     public void onClick(HashMap<String, String> selectedMovie) {
-        if (mToast != null) {
-            mToast.cancel();
+        //Just for testing
+//        if (mToast != null) {
+//            mToast.cancel();
+//        }
+//
+//        mToast = Toast.makeText(mContext, selectedMovie.get("title"), Toast.LENGTH_SHORT);
+//        mToast.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        Log.v("backbutton","Search icon click, asdsadsasadsa");
+        if (!mSearchView.isIconified()) {
+            showPopularMovieView();
+            mSearchView.onActionViewCollapsed();
+            mSearchView.setIconified(true);
+
+        } else {
+            super.onBackPressed();
         }
 
-        mToast = Toast.makeText(context, selectedMovie.get("title"), Toast.LENGTH_SHORT);
-        mToast.show();
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        /* Use AppCompatActivity's method getMenuInflater to get a handle on the menu inflater */
+        MenuInflater inflater = getMenuInflater();
+        /* Use the inflater's inflate method to inflate our menu layout to this menu */
+        inflater.inflate(R.menu.main_menu, menu);
+
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
+
+        if (searchItem != null) {
+            mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+            final EditText searchPlate = (EditText) mSearchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+            searchPlate.setHint("Search a movie...");
+            View searchPlateView = mSearchView.findViewById(android.support.v7.appcompat.R.id.search_plate);
+            searchPlateView.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
+
+            mSearchView.setOnCloseListener(new SearchView.OnCloseListener() {
+                @Override
+                public boolean onClose() {
+                    showPopularMovieView();
+//                    if (mToast != null) {
+//                        mToast.cancel();
+//                    }
+//                    mToast = Toast.makeText(context, "Close button", Toast.LENGTH_SHORT);
+//                    mToast.show();
+
+
+                    return false;
+                }
+            });
+            mSearchView.setOnSearchClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int id = v.getId();
+
+//                    Log.v("CLICK ITEM MENU", "ASDSADASDASDSADSA");
+//                    if (mToast != null) {
+//                        mToast.cancel();
+//                    }
+
+                    if (id == R.id.action_search) {
+                        showSearchMovieView();
+//                        mToast = Toast.makeText(context, String.valueOf(id), Toast.LENGTH_SHORT);
+//                        mToast.show();
+                    }
+                }
+            });
+
+            // use this method for search process
+            mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+                FetchMovieTask searchMovieTask = new FetchMovieTask();
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+                    // use this method when query submitted
+//                    if (mToast != null) {
+//                        mToast.cancel();
+//                    }
+//                    mToast = Toast.makeText(context, query, Toast.LENGTH_SHORT);
+//                    mToast.show();
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    if (searchMovieTask.getStatus() != AsyncTask.Status.FINISHED) {
+                        searchMovieTask.cancel(true);
+                    }
+
+                    pageNumberSearch = 1;
+                    searchMovieTask = loadMovieData(newText);
+                    mSearchRecyclerView.scrollToPosition(0);
+
+                    return false;
+                }
+            });
+            SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
+            mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+
+        }
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    /********************************** Interfaces and Classes ***********************************/
 
     public class FetchMovieTask extends AsyncTask<String, Void, ArrayList<HashMap>> {
 
@@ -237,8 +347,10 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
             }
 
             URL movieRequestUrl;
+            String keywordSearch = params[0];
+            String pageNumber = params[1];
 
-            movieRequestUrl = NetworkUtils.buildUrl(isSearch, params[0], params[1]);
+            movieRequestUrl = NetworkUtils.buildUrl(isSearch, keywordSearch, pageNumber);
 
             try {
 
@@ -248,16 +360,16 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
                 ArrayList<HashMap> simpleJsonMovieData = ReadJsonResponsesUtils
                         .getSimpleMovieStringsFromJson(MainActivity.this, jsonMovieResponse);
 
-                if (!isSearch && params[1].equals("1")) {
+                if (!isSearch && pageNumber.equals("1")) {
                     currentMovieDataPopular = simpleJsonMovieData;
                 }
-                else if(!isSearch && !params[1].equals("1")) {
+                else if(!isSearch && !pageNumber.equals("1")) {
                     currentMovieDataPopular.addAll(simpleJsonMovieData);
                 }
-                else if (isSearch && params[1].equals("1")) {
+                else if (isSearch && pageNumber.equals("1")) {
                     currentMovieDataSearch = simpleJsonMovieData;
                 }
-                else if(isSearch && !params[1].equals("1")) {
+                else if(isSearch && !pageNumber.equals("1")) {
                     currentMovieDataSearch.addAll(simpleJsonMovieData);
                 }
 
@@ -295,104 +407,6 @@ public class MainActivity extends AppCompatActivity implements ListAdapter.ListA
                 showErrorMessage();
             }
         }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        /* Use AppCompatActivity's method getMenuInflater to get a handle on the menu inflater */
-        MenuInflater inflater = getMenuInflater();
-        /* Use the inflater's inflate method to inflate our menu layout to this menu */
-        inflater.inflate(R.menu.main_menu, menu);
-
-        final MenuItem searchItem = menu.findItem(R.id.action_search);
-
-        if (searchItem != null) {
-            searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-            final EditText searchPlate = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
-            searchPlate.setHint("Search a movie...");
-            View searchPlateView = searchView.findViewById(android.support.v7.appcompat.R.id.search_plate);
-            searchPlateView.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
-
-            searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-                @Override
-                public boolean onClose() {
-                    showPopularMovieView();
-//                    if (mToast != null) {
-//                        mToast.cancel();
-//                    }
-//                    mToast = Toast.makeText(context, "Close button", Toast.LENGTH_SHORT);
-//                    mToast.show();
-
-
-                    return false;
-                }
-            });
-            searchView.setOnSearchClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int id = v.getId();
-
-//                    Log.v("CLICK ITEM MENU", "ASDSADASDASDSADSA");
-//                    if (mToast != null) {
-//                        mToast.cancel();
-//                    }
-
-                    if (id == R.id.action_search) {
-                        showSearchMovieView();
-//                        mToast = Toast.makeText(context, String.valueOf(id), Toast.LENGTH_SHORT);
-//                        mToast.show();
-                    }
-                }
-            });
-
-            // use this method for search process
-            searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-                FetchMovieTask searchMovieTask = new FetchMovieTask();
-
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-                    // use this method when query submitted
-//                    if (mToast != null) {
-//                        mToast.cancel();
-//                    }
-//                    mToast = Toast.makeText(context, query, Toast.LENGTH_SHORT);
-//                    mToast.show();
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    if (searchMovieTask.getStatus() != AsyncTask.Status.FINISHED) {
-                        searchMovieTask.cancel(true);
-                    }
-
-                    pageNumberSearch = 1;
-                    searchMovieTask = loadMovieData(newText);
-                    mSearchRecyclerView.scrollToPosition(0);
-
-                    return false;
-                }
-            });
-            SearchManager searchManager = (SearchManager) getSystemService(SEARCH_SERVICE);
-            searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-
-        }
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public void onBackPressed() {
-        Log.v("backbutton","Search icon click, asdsadsasadsa");
-        if (!searchView.isIconified()) {
-            showPopularMovieView();
-            searchView.onActionViewCollapsed();
-            searchView.setIconified(true);
-
-        } else {
-            super.onBackPressed();
-        }
-
     }
 
 }

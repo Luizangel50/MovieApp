@@ -20,6 +20,8 @@ import java.util.Scanner;
 
 public final class NetworkUtils {
 
+    /********************************** Variables, constants and constructor **********************/
+
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     private static final String MOVIE_URL =
@@ -62,6 +64,8 @@ public final class NetworkUtils {
 //    private static final String pageNumber = "1";
 
     private static final String region = "en-US";
+
+    /********************************** Non-overridden methods ***********************************/
 
     /**
      * Builds the URL used to talk to the The Movie DB API

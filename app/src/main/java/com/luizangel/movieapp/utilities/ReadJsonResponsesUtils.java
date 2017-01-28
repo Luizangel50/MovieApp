@@ -9,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -18,6 +17,8 @@ import java.util.HashMap;
  */
 
 public final class ReadJsonResponsesUtils {
+
+    /********************************** Non-overridden methods ***********************************/
 
     /**
      * This method parses JSON from a web response and returns an array of Strings
@@ -69,11 +70,11 @@ public final class ReadJsonResponsesUtils {
             Log.e("CONNECTION ERROR", "No Internet connection");
         }
 
-        int pageNumber = responseJson.getInt(FIELD_PAGE);
-
-        int totalPagesNumber = responseJson.getInt(FIELD_TOTAL_PAGES);
-
-        int totalResults = responseJson.getInt(FIELD_TOTAL_RESULTS);
+//        int pageNumber = responseJson.getInt(FIELD_PAGE);
+//
+//        int totalPagesNumber = responseJson.getInt(FIELD_TOTAL_PAGES);
+//
+//        int totalResults = responseJson.getInt(FIELD_TOTAL_RESULTS);
 
         JSONArray movieArray = responseJson.getJSONArray(FIELD_RESULTS);
 
@@ -81,11 +82,11 @@ public final class ReadJsonResponsesUtils {
 
         for (int i = 0; i < movieArray.length(); i++) {
             //These are the values that will be collected
-            String title;
+//            String title;
+//            String overview;
+//            String releaseYear;
+//            String idMovie;
             String posterPath;
-            String overview;
-            String releaseYear;
-            String idMovie;
 
             JSONObject currentMovieObject = movieArray.getJSONObject(i);
 
